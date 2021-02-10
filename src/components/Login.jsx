@@ -1,25 +1,23 @@
-import React from 'react';
-import {useForm, Controller } from 'react-hook-form';
-import { axiosWithAuth, logout } from '../utils/axiosWithAuth';
+import React from "react";
+import { useForm, Controller } from "react-hook-form";
+import { axiosWithAuth, logout } from "../utils/axiosWithAuth";
 import MaterialUIInput from "@material-ui/core/Input";
-
 
 export default function LoginForm() {
   const { control, register, errors, handleSubmit } = useForm();
 
-  const onSubmit = data => {
-      axiosWithAuth().post(`/login`, data)
-    .then(res => {
-      console.log('This is response ', res);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('id', res.data.id);
-      // props.history.push('/welcome')
-    })
-    .catch(err => console.log('Axios error ', err.response))
-  }
-  
+  const onSubmit = (data) => {
+    axiosWithAuth()
+      .post(`/login`, data)
+      .then((res) => {
+        console.log("This is response ", res);
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("id", res.data.id);
+        // props.history.push('/welcome')
+      })
+      .catch((err) => console.log("Axios error ", err.response));
+  };
 
-  
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Controller
@@ -45,5 +43,5 @@ export default function LoginForm() {
       {/* <input name="age" type="number" ref={register({ min: 18, max: 99 })} /> */}
       <input type="submit" />
     </form>
-  )
+  );
 }

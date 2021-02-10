@@ -1,16 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid } from "@material-ui/data-grid";
 import { makeStyles } from "@material-ui/core/styles";
-// import { useForm } from "react-hook-form";
 import CircularLoading from "../utils/Loading";
-import { Button } from "@material-ui/core";
-import { axiosWithAuth } from '../utils/axiosWithAuth';
-import { useForm, Controller } from "react-hook-form";
-import Container from "@material-ui/core/Container";
-import TextField from '@material-ui/core/TextField';
-import Autocomplete from '@material-ui/lab/Autocomplete';
-
-
+import { axiosWithAuth } from "../utils/axiosWithAuth";
+import AddExpenseForm from './AddExpenseForm';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -63,56 +56,26 @@ const columns = [
 export default function UserHome(props) {
   const [expenses, setExpenses] = useState([]);
   const [data, setData] = useState([]); // for checkbox selection
-  const [auto, setAuto] = useState({}); // used for auto complete
-  const { control, register, errors, handleSubmit, reset,
-    formState: { isSubmitSuccessful }
-  } = useForm({ defaultValues: { title: '', amount: ''}});
-
   const classes = useStyles();
-
+ 
   useEffect(() => {
     return axiosWithAuth()
-      .get('/')
-      .then(res => {
-        setExpenses({ expense: res.data})
+      .get("/")
+      .then((res) => {
+        console.log(res.data);
+        setExpenses(res.data);
       })
-      .catch(err => console.log(err));
+      .catch((err) => console.log(err));
   }, []);
 
-  const onAuto = (tag) => {
-    if (!tag) {
-      console.log('WTF dude')
-    }
-    setAuto(tag);
-    console.log(auto);
-  }
-
   const create = (newExpense, tags) => {
-    // setExpenses({
-    //   expense: [...expenses, newExpense]
-    // })
     axiosWithAuth()
-    .post('/expense', { ...newExpense, tags: tags })
-    .then(res => console.log("This is the post response: ", res.data.expense[0]))
-    .then(res => setExpenses([...expenses, res.data.expense[0]]))
-    .catch(err => console.log(err))
-  }
-  const onSubmit = (e) => {
-    // e.preventDefault();
-    let tags = auto.tags;
-    if (!tags) {
-      console.log('WTF dude/');
-    }
-    // if (isSubmitSuccessful) {
-    //   reset({ title: '', amount: '' })
-    // }
-    create(e, tags)
-
-      reset({ title: '', amount: '' })
-  }
-
-  console.log('iste budur: ', expenses);
-  
+      .post("/expense", { ...newExpense, tags: tags })
+      .then((res) => {
+        setExpenses([...expenses, res.data.expense[0]]);
+      })
+      .catch((err) => console.log(err.response));
+  };
 
   return (
     <div className={classes.root}>
@@ -121,7 +84,7 @@ export default function UserHome(props) {
         <div style={{ flexGrow: 1, width: 1000, height: 400 }}>
           <DataGrid
             autoHeight
-            rows={expenses.expense}
+            rows={expenses}
             columns={columns}
             pageSize={5}
             checkboxSelection
@@ -134,87 +97,11 @@ export default function UserHome(props) {
         </div>
       )}
 
-      <Container component="main" maxWidth="xs">
-      <form
-        className={classes.form}
-        noValidate
-        onSubmit={handleSubmit(onSubmit)}
-      >
-        <Controller
-          as={TextField}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          required
-          inputRef={register}
-          label="Title"
-          autoFocus
-          name="title"
-          control={control}
-          rules={{ required: true }}
-        />
-          {errors.title && "Title is required!"}
-
-          <Controller
-            as={TextField}
-            variant="outlined"
-            margin="normal"
-            fullWidth
-            required
-            inputRef={register}
-            label="Amount"
-            autoFocus
-            name="amount"
-            control={control}
-            rules={{ required: true }}
-          />
-          {errors.amount && "Amount is required!"}
+      <AddExpenseForm 
+        addExpense={create}
+      />
       
-        
-        <Autocomplete
-          id="combo-box"
-          options={tags}
-          getOptionLabel={(option) => option.tags}
-          maxWidth="xs"
-          onChange={(event, value) => onAuto(value)} 
-          
-          renderInput={(params) => 
-            
-            <TextField {...params}
-            label="Select a tag" 
-            variant="outlined"
-            name="tags"
-            required
-            control={control}
-            rules={{ required: true }}
-
-          />}
-        />
-        {errors.tags && 'Tags required'}
-
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          className={classes.submit}
-          
-        >
-          Submit
-        </Button>
-      </form>
-      </Container>
     </div>
-  )
+  );
 }
 
-const tags = [
-  {tags: 'Automotive'},
-  {tags: 'Food'},
-  {tags: 'Mortgage'}, 
-  {tags: 'Electric'}, 
-  {tags: 'Gas'}, 
-  {tags: 'Vacation'},
-  {tags: 'Insurance'}, 
-  {tags: 'Gift'},
-]
