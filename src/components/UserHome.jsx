@@ -4,6 +4,11 @@ import { makeStyles } from "@material-ui/core/styles";
 import CircularLoading from "../utils/Loading";
 import { axiosWithAuth } from "../utils/axiosWithAuth";
 import AddExpenseForm from './AddExpenseForm';
+import DeleteSelected from "./DeleteSelected";
+
+import EditIcon from '@material-ui/icons/Edit';
+import DeleteIcon from '@material-ui/icons/Delete';
+
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -77,6 +82,19 @@ export default function UserHome(props) {
       .catch((err) => console.log(err.response));
   };
 
+  const deleteSelected = () => {
+    // delete selected expenses from database
+    data.map(val => {
+      return axiosWithAuth()
+        .delete(`/expense/${val}`)
+        .then(res => {
+          // update the UI after removing selected expenses
+          let newExpenses = expenses.filter(ex => ex.id !== Number(val))
+          setExpenses(newExpenses)
+        }).catch(err => err.response)
+    })
+  }
+
   return (
     <div className={classes.root}>
       {!expenses.length && <CircularLoading />}
@@ -93,9 +111,14 @@ export default function UserHome(props) {
               setData(newSelection.rowIds);
             }}
             {...data}
+            
           />
         </div>
       )}
+      <DeleteSelected 
+        checkboxSelection={data}
+        deleteSelected={deleteSelected}
+      />
 
       <AddExpenseForm 
         addExpense={create}

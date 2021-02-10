@@ -29,35 +29,34 @@ export default function DeleteSelected(props) {
   } = useForm();
 
   let selection = props.selection;
+
   // delete all selected expenses
-  const deleteSelected = async () => {
-    console.log('is submit successful ', isSubmitSuccessful)
-    const deleteThis = await props.checkboxSelection.map((val, i) => {
-      return axiosWithAuth()
-        .delete(`/expense/${val}`)
-        .then(res => {
-          // console.log('DELETED: ', val);
-          console.log('what is res here ', res);
-        }).catch(err => console.log('Something not cool   '))
-    });
-  }
+  // const deleteSelected = async () => {
+  //   console.log('is submit successful ', isSubmitSuccessful)
+  //   const deleteThis = await props.checkboxSelection.map((val, i) => {
+  //     return axiosWithAuth()
+  //       .delete(`/expense/${val}`)
+  //       .then(res => {
+  //         // console.log('DELETED: ', val);
+  //         console.log('what is res here ', res);
+  //       }).catch(err => console.log('Something not cool   '))
+  //   });
+  // }
 
 
   return (
     <div>
       {props.checkboxSelection.length ? (
         <Container component="main" maxWidth="xs">
-          
             <Button
               type="submit"
               fullWidth
               variant="contained"
               color="secondary"
-              onClick={deleteSelected}
+              onClick={props.deleteSelected}
             >
               Delete selected
             </Button>
-          
         </Container>
       ) : (
         <Divider className='divider' color='secondary'  />
@@ -67,9 +66,4 @@ export default function DeleteSelected(props) {
   )
 }
 
-// 
-
-{/* <form
-          className={classes.form} 
-          onSubmit={handleSubmit(deleteSelected)}
-          ></form> */}
+// EOF
