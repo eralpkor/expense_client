@@ -1,3 +1,5 @@
+import React from 'react';
+
 import './App.css';
 import { Route, Switch } from 'react-router-dom';
 import Navigation from './components/Navigation';
@@ -8,10 +10,14 @@ import PrivateRoute from './utils/PrivateRoute';
 
 
 
-function App() {
+function App(props) {
+  const [auth, setAuth] = React.useState(false);
+  
   return (
     <div className="App">
-      <Navigation />
+      <Navigation 
+        
+      />
       <Switch>
         <Route exact path='/' component={SignIn} />
         <PrivateRoute path='/home' component={UserHome} />

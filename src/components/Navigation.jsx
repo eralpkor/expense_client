@@ -12,6 +12,8 @@ import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 
+import { logout } from '../utils/axiosWithAuth'
+
 const useStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1,
@@ -26,12 +28,17 @@ const useStyles = makeStyles(theme => ({
 
 export default function Navigation() {
   const classes = useStyles();
-  const [auth, setAuth] = React.useState(true);
+  const [auth, setAuth] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
   const handleChange = (event) => {
     setAuth(event.target.checked);
+
+    if (auth) {
+      console.log(auth);
+      logout()
+    }
   }
 
   const handleMenu = (event) => {
@@ -46,8 +53,13 @@ export default function Navigation() {
     <div className={classes.root}>
       <FormGroup>
         <FormControlLabel
-          control={<Switch checked={auth} onChange={handleChange} aria-label="login switch" />}
+          control={<Switch 
+          checked={auth} 
+          onChange={handleChange} 
+          aria-label="login switch" />}
           label={auth ? 'Logout' : 'Login'}
+
+          
         />
       </FormGroup>
       <AppBar position="static">

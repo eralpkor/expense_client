@@ -3,7 +3,7 @@ import { useForm, Controller } from "react-hook-form";
 import { axiosWithAuth, logout } from "../utils/axiosWithAuth";
 import MaterialUIInput from "@material-ui/core/Input";
 
-export default function LoginForm() {
+export default function LoginForm(props) {
   const { control, register, errors, handleSubmit } = useForm();
 
   const onSubmit = (data) => {

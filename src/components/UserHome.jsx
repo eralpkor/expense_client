@@ -111,7 +111,6 @@ export default function UserHome(props) {
               setData(newSelection.rowIds);
             }}
             {...data}
-            
           />
         </div>
       )}
@@ -119,11 +118,9 @@ export default function UserHome(props) {
         checkboxSelection={data}
         deleteSelected={deleteSelected}
       />
-
       <AddExpenseForm 
         addExpense={create}
       />
-      
     </div>
   );
 }

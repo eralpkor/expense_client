@@ -14,6 +14,6 @@ export const axiosWithAuth = () => {
 // clear the token with logout
 export const logout = () => {
   localStorage.clear();
-  window.location.href = window.location.origin + '/';
+  window.location.href = window.location.origin + '/logout';
 }
 

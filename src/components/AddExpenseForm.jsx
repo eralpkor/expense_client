@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { axiosWithAuth } from "../utils/axiosWithAuth";
+import React, { useState } from "react";
 import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import Container from "@material-ui/core/Container";
@@ -34,8 +33,6 @@ const useStyles = makeStyles((theme) => ({
 
 export default function AddExpenseForm(props) {
   const [auto, setAuto] = useState({}); // used for tricking the auto complete.
-
-
   const classes = useStyles();
   const {
     control,
