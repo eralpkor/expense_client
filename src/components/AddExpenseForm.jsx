@@ -106,7 +106,7 @@ export default function AddExpenseForm(props) {
           id="combo-box"
           options={tags}
           getOptionLabel={(option) => option.tags}
-          maxWidth="xs"
+          maxwidth="xs"
           onChange={(event, value) => onAuto(value)}
           renderInput={(params) => (
             <TextField
