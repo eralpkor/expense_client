@@ -12,7 +12,10 @@ import FormGroup from '@material-ui/core/FormGroup';
 import MenuItem from '@material-ui/core/MenuItem';
 import Menu from '@material-ui/core/Menu';
 
-import { logout } from '../utils/axiosWithAuth'
+// import { logout } from '../utils/axiosWithAuth';
+
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../store/actions/auth";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -32,12 +35,19 @@ export default function Navigation() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
+  const dispatch = useDispatch();
+  const logOut = () => {
+    dispatch(logout());
+  };
+
+
   const handleChange = (event) => {
     setAuth(event.target.checked);
 
     if (auth) {
       console.log(auth);
-      logout()
+      // clear localStorage and got to signIn page
+      dispatch(logOut())
     }
   }
 
