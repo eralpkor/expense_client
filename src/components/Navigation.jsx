@@ -36,10 +36,6 @@ export default function Navigation() {
   const open = Boolean(anchorEl);
 
   const dispatch = useDispatch();
-  const logOut = () => {
-    dispatch(logout());
-  };
-
 
   const handleChange = (event) => {
     setAuth(event.target.checked);
@@ -47,7 +43,7 @@ export default function Navigation() {
     if (auth) {
       console.log(auth);
       // clear localStorage and got to signIn page
-      dispatch(logOut())
+      dispatch(logout())
     }
   }
 
