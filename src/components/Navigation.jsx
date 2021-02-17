@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -16,6 +16,8 @@ import Menu from '@material-ui/core/Menu';
 
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../store/actions/auth";
+import { Link } from "react-router-dom";
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -27,21 +29,33 @@ const useStyles = makeStyles(theme => ({
   title: {
     flexGrow: 1,
   },
+  navLink: {
+    textDecoration: 'none',
+    color: 'inherit'
+  }
 }));
 
 export default function Navigation() {
-  const classes = useStyles();
-  const [auth, setAuth] = React.useState(false);
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
+  const { isLoggedIn } = useSelector(state => state.auth);
+  const { user: currentUser } = useSelector((state) => state.auth);
 
   const dispatch = useDispatch();
 
-  const handleChange = (event) => {
-    setAuth(event.target.checked);
 
+
+  const classes = useStyles();
+  const [auth, setAuth] = React.useState(isLoggedIn); // if logged switch
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleChange = (event) => {
+
+console.log('Navigation button change ', event.target.checked);
+console.log('is logged in ', isLoggedIn)
     if (auth) {
       console.log(auth);
+    setAuth(event.target.checked);
+
       // clear localStorage and got to signIn page
       dispatch(logout())
     }
@@ -70,9 +84,9 @@ export default function Navigation() {
       </FormGroup>
       <AppBar position="static">
         <Toolbar>
-          <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
+          {/* <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
             <MenuIcon />
-          </IconButton>
+          </IconButton> */}
           <Typography variant="h6" className={classes.title}>
             Expenses
           </Typography>
@@ -85,6 +99,7 @@ export default function Navigation() {
                 onClick={handleMenu}
                 color="inherit"
               >
+              {currentUser.user}
                 <AccountCircle />
               </IconButton>
               <Menu
@@ -102,8 +117,12 @@ export default function Navigation() {
                 open={open}
                 onClose={handleClose}
               >
+              <Link to={'/profile'} className={classes.navLink}>
                 <MenuItem onClick={handleClose}>Profile</MenuItem>
+              </Link>
+              <Link to={'/account'} className={classes.navLink}>
                 <MenuItem onClick={handleClose}>My account</MenuItem>
+              </Link>
               </Menu>
             </div>
           )}
