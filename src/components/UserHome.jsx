@@ -3,11 +3,12 @@ import { DataGrid } from "@material-ui/data-grid";
 import { makeStyles } from "@material-ui/core/styles";
 import CircularLoading from "../utils/Loading";
 import { axiosWithAuth } from "../utils/axiosWithAuth";
-import AddExpenseForm from './AddExpenseForm';
+import AddExpenseForm from "./AddExpenseForm";
 import DeleteSelected from "./DeleteSelected";
 
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
+import UserService from "../services/user.service";
+import { useDispatch, useSelector } from "react-redux";
+
 
 
 const useStyles = makeStyles((theme) => ({
@@ -61,17 +62,33 @@ const columns = [
 export default function UserHome(props) {
   const [expenses, setExpenses] = useState([]);
   const [data, setData] = useState([]); // for checkbox selection
+  const { user: currentUser } = useSelector((state) => state.auth);
+
   const classes = useStyles();
- 
+
+  // console.log(currentUser);
+
+// I can put useeffect in a function and call it again in
+// delete selected function
+// OR make deleteSelected async function and create two promises
+// call it one an after
+
+
+
   useEffect(() => {
-    return axiosWithAuth()
-      .get("/")
+    if (!currentUser) {
+      props.history.push("/login");
+      window.location.reload();
+  }
+    UserService.getUserExpense()
       .then((res) => {
-        console.log(res.data);
+        // console.log(res.data);
         setExpenses(res.data);
       })
       .catch((err) => console.log(err));
   }, []);
+
+  let message;
 
   const create = (newExpense, tags) => {
     axiosWithAuth()
@@ -79,21 +96,35 @@ export default function UserHome(props) {
       .then((res) => {
         setExpenses([...expenses, res.data.expense[0]]);
       })
-      .catch((err) => console.log(err.response));
+      .catch((err) => {
+        // set error message for amount
+        message = err.response.data.errors[0].msg;
+        console.log(message);
+      });
   };
 
-  const deleteSelected = () => {
-    // delete selected expenses from database
-    data.map(val => {
+  const deleteSelected =  () => {
+
+    var filteredExpenses = expenses.filter(val => !data.includes(val.id))
+    
+    data.map((val) => {
       return axiosWithAuth()
         .delete(`/expense/${val}`)
-        .then(res => {
+        .then((res) => {
           // update the UI after removing selected expenses
-          let newExpenses = expenses.filter(ex => ex.id !== Number(val))
-          setExpenses(newExpenses)
-        }).catch(err => err.response)
-    })
-  }
+          // let newExpenses = expenses.filter((ex) => ex.id !== Number(val));
+          setExpenses(filteredExpenses)
+        })
+        .catch((err) => err.response);
+    });
+
+    // let result = data.map(del => {
+    //   return expenses.filter(ex => {
+    //     return ex.id !== Number(del)
+    //   })
+    // })
+    // console.log('Result should be ', result);
+  };
 
   return (
     <div className={classes.root}>
@@ -114,14 +145,11 @@ export default function UserHome(props) {
           />
         </div>
       )}
-      <DeleteSelected 
+      <DeleteSelected
         checkboxSelection={data}
         deleteSelected={deleteSelected}
       />
-      <AddExpenseForm 
-        addExpense={create}
-      />
+      <AddExpenseForm addExpense={create} message={message} />
     </div>
   );
 }
-
