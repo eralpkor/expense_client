@@ -1,25 +1,21 @@
 import React, { useState, useRef } from "react";
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { makeStyles } from "@material-ui/core/styles";
+import Box from "@material-ui/core/Box";
 
 import Grid from "@material-ui/core/Grid";
 import Container from "@material-ui/core/Container";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Avatar from "@material-ui/core/Avatar";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-
-import Form from "react-validation/build/form";
-import Input from "react-validation/build/input";
-import CheckButton from "react-validation/build/button";
-import { isEmail } from "validator";
-
-import { register } from "../store/actions/auth";
+import { registerUser } from "../store/actions/auth";
 import { Button, TextField, Typography } from "@material-ui/core";
+import { useForm, Controller } from "react-hook-form";
+import LinkMe from "@material-ui/core/Link";
+import ReCaptcha from "./Captcha";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
   paper: {
     marginTop: theme.spacing(8),
     display: "flex",
@@ -38,166 +34,238 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(3, 0, 2),
   },
   alertDanger: {
-    color: "red",
+    color: "#bf1650",
   },
   alertSuccess: {
-    color: "blue"
+    color: "#3f51b5",
+    fontSize: "2rem"
+  },
+  navLink: {
+    textDecoration: "none",
+    color: "inherit",
+  },
+  captcha: {
+    marginTop: "25em",
+    color: "#bf1650"
   }
-
 }));
 
-const required = (value) => {
-  if (!value) {
-    return (
-      <div className="alertDanger" role="alert">
-        This field is required!
-      </div>
-    );
-  }
-};
+function Copyright() {
+  return (
+    <Typography variant="body2" color="textSecondary" align="center">
+      {"Copyright © "}
+      <LinkMe color="inherit" href="https://eralpkor.com">
+        eralpkor.com
+      </LinkMe>{" "}
+      {new Date().getFullYear()}
+      {"."}
+    </Typography>
+  );
+}
 
-const validEmail = (value) => {
-  if (!value) {
-    return (
-      <div className="alertDanger" role="alert">
-        This is not a valid email.
-      </div>
-    );
-  }
-};
-
-const vusername = (value) => {
-  if (value.length < 3 || value.length > 20) {
-    return (
-      <div className="alertDanger" role="alert">
-        The username must be between 3 and 20 characters.
-      </div>
-    );
-  }
-};
-
-const vpassword = (value) => {
-  if (value.length < 6 || value.length > 40) {
-    return (
-      <div className="alertDanger" role="alert">
-        The password must be between 6 and 40 characters.
-      </div>
-    );
-  }
-};
-
-export default function Register() {
-  const form = useRef();
-  const checkBtn = useRef();
-  const classes = useStyles();
-
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function Register(props) {
+  // const [loading, setLoading] = useState(false);
   const [successful, setSuccessful] = useState(false);
   const { message } = useSelector((state) => state.message);
   const dispatch = useDispatch();
 
-  const onChangeUsername = (e) => {
-    const username = e.target.value;
-    setUsername(username);
-  };
+  const classes = useStyles();
+  const { control, register, errors, handleSubmit, reset } = useForm(
+    {
+    defaultValues: { username: "", email: "", password: "" },
+  }
+  );
 
-  const onChangeEmail = (e) => {
-    setEmail(e.target.value);
-  };
-
-  const onChangePassword = (e) => {
-    setPassword(e.target.value);
-  };
-
-  const handleRegister = (e) => {
-    e.preventDefault();
-
+  const onSubmit = (data) => {
+    console.log('ONSUBMIT', data);
     setSuccessful(false);
 
-    form.current.validateAll();
-
-    if (checkBtn.current.context._errors.length === 0) {
-      dispatch(register(username, email, password))
-        .then(() => {
-          setSuccessful(true);
-        })
-        .catch(() => {
-          setSuccessful(false);
-        });
-    }
+    dispatch(registerUser(data.username, data.email, data.password))
+      .then((res) => {
+        props.history.push("/login");
+        setSuccessful(true);
+        console.log("user registered, ", res);
+        // reset();
+      })
+      .catch((err) => {
+        console.log(err);
+        setSuccessful(false);
+      });
   };
+  console.log(errors);
 
   return (
-    <div className={classes.root}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign Up
-          </Typography>
-          <Form onSubmit={handleRegister} ref={form} className={classes.form}>
-            {!successful && (
-              <div className="formGroup">
-              <TextField
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <Avatar className={classes.avatar}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Register for Expenses
+        </Typography>
+        <form
+          className={classes.form}
+          noValidate
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          {!successful && (
+            <div>
+              <Controller
+                as={TextField}
                 variant="outlined"
                 margin="normal"
                 fullWidth
+                required
+                inputRef={register}
                 label="Username"
-                value={username}
-                onChange={onChangeUsername}
-                validations={[required, vusername]}
+                autoFocus
+                name="username"
+                control={control}
+                rules={{ 
+                  required: true,
+                  minLength: {
+                  value: 5,
+                  message: "min length is 5"
+                },
+                maxLength: {
+                  value: 50,
+                  message: "max length is 50"
+                } 
+                }}
+                
               />
+              {errors.username && 
+              errors.username.type === "required" &&
+              <span role="alert">Username is required!</span>}
+              {errors.username && <span role="alert">{errors.username.message}</span>}
 
-              <TextField  
+              <Controller 
+              as={TextField}
                 variant="outlined"
                 margin="normal"
                 fullWidth
+                required
+                inputRef={register}
                 label="Email"
-                value={email}
-                onChange={onChangeEmail}
-                validations={[required, validEmail]}
+                autoFocus
+                name="email"
+                control={control}
+                rules={{ 
+                  required: true,
+                  pattern: {
+                    value: /\S+@\S+\.\S+/,
+                    message: "Entered value does not match email format"
+                  }
+                }}
+                type='email'
+                placeholder='example@mail.com'
               />
+              {errors.email &&
+              errors.email.type === "required" &&
+              "Email is required."}
+              {errors.email && <span role="alert">{errors.email.message}</span>}
+            <Controller
+              as={TextField}
+              variant="outlined"
+              margin="normal"
+              fullWidth
+              required
+              label="Password"
+              type="password"
+              name="password"
+              control={control}
+              rules={{
+                required: true,
+                
+                minLength: {
+                  value: 5,
+                  message: "min length is 5"
+                },
+                maxLength: {
+                  value: 50,
+                  message: "max length is 50"
+                }
+              }}
+            />
+            {errors.password &&
+              errors.password.type === "required" &&
+              "Password is required."}
+            {errors.password &&
+             <span role="alert">{errors.password.message}</span>}
+          </div>
+          )}
 
-              <TextField  
-                variant="outlined"
-                margin="normal"
-                fullWidth
-                label="Password"
-                value={password}
-                onChange={onChangePassword}
-                validations={[required, vpassword]}
-              />
-
-              <div>
-                <Button 
-                  type="sumbit"
-                  fullWidth
-                  variant="contained"
-                  color="primary"
-                  className={classes.submit}
-                >
-                  Sign Up
-                </Button>
-              </div>
-              </div>
-            )}
-            {message && (
-              <div className={classes.form}>
-              <div className={ successful ? classes.alertSuccess : classes.alertDanger} role="alert">
+          {message && (
+            <div className="form-group">
+              <div
+                className={
+                  successful ? "alert alertSuccess" : "alert alertDanger"
+                }
+                role="alert"
+              >
                 {message}
               </div>
-              </div>
-              
-            )}
-            <CheckButton style={{ display: 'none' }} ref={checkBtn} />
-          </Form>
-        </div>
-      </Container>
-    </div>
+            </div>
+          )}
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            Sign In
+          </Button>
+        </form>
+        <ReCaptcha className={classes.captcha} />
+      </div>
+      <Box mt={8}>
+        <Copyright />
+      </Box>
+    </Container>
   );
 }
+
+
+// test 
+  // const [user, setUser] = useState({
+  //   username: '',
+  //   email: '',
+  //   password: '',
+  // })
+
+  // const handleChange = (e) => {
+  //   setUser({
+  //     ...user,
+  //     [e.target.name]: e.target.value,
+  //   })
+  // }
+
+  // const handleSubmit = (e) => {
+  //   console.log('SUbmitted ', user);
+  //   e.preventDefault();
+
+  //   dispatch(register(user.username, user.email, user.password))
+  //     .then(res => {
+  //       console.log('submit with success ', res);
+  //     })
+  // }
+
+    // return (
+  //   <div>
+  //     <form onSubmit={handleSubmit} >
+  //       <input type="text"
+  //         name='username'
+  //        value={user.username} onChange={handleChange} />
+  //       <input type="email"
+  //         name="email"
+  //        value={user.email} onChange={handleChange} />
+  //       <input type="password"
+  //         name="password"
+  //        value={user.password} onChange={handleChange} />
+
+  //       <input type="submit" value="Submit" />
+  //     </form>
+  //   </div>
+  // )
