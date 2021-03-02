@@ -51,7 +51,7 @@ export default function AddExpenseForm(props) {
     console.log(auto);
   };
 
-  const onSubmit = (e, shit) => {
+  const onSubmit = (e) => {
     let tags = auto.tags;
     if (!tags) {
       console.log("WTF dude/");
@@ -99,6 +99,7 @@ export default function AddExpenseForm(props) {
           name="amount"
           control={control}
           rules={{ required: true }}
+          type="number"
         />
         {errors.amount && "Amount is required!"}
 
@@ -146,3 +147,5 @@ const tags = [
   { tags: "Insurance" },
   { tags: "Gift" },
 ];
+
+// EOF
