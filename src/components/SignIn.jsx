@@ -1,6 +1,8 @@
-import React from "react";
-import { axiosWithAuth } from "../utils/axiosWithAuth";
-
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import { login } from "../store/actions/auth";
+import { useDispatch, useSelector } from "react-redux";
+import { Redirect } from "react-router-dom";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -8,7 +10,7 @@ import TextField from "@material-ui/core/TextField";
 
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
-import Link from "@material-ui/core/Link";
+import LinkMe from "@material-ui/core/Link";
 import Grid from "@material-ui/core/Grid";
 import Box from "@material-ui/core/Box";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
@@ -17,14 +19,15 @@ import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 
 import { useForm, Controller } from "react-hook-form";
+import ReCaptcha from './Captcha';
 
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {"Copyright © "}
-      <Link color="inherit" href="https://eralpkor.com">
+      <LinkMe color="inherit" href="https://eralpkor.com">
         eralpkor.com
-      </Link>{" "}
+      </LinkMe>{" "}
       {new Date().getFullYear()}
       {"."}
     </Typography>
@@ -49,26 +52,47 @@ const useStyles = makeStyles((theme) => ({
   submit: {
     margin: theme.spacing(3, 0, 2),
   },
+  alertDanger: {
+    color: "#bf1650"
+  },
+  navLink: {
+    textDecoration: 'none',
+    color: 'inherit'
+  }
 }));
 
 export default function SignIn(props) {
+  const [loading, setLoading] = useState(false);
+
+  const { isLoggedIn } = useSelector((state) => state.auth);
+  const { message } = useSelector(state => state.message);
+
+  const dispatch = useDispatch();
+
   const classes = useStyles();
-  const { control, register, errors, handleSubmit,
-     reset,
-    } = useForm({ defaultValues: { username: '', password: ''}});
+  const { control, register, errors, handleSubmit, reset } = useForm({
+    defaultValues: { username: "", password: "" },
+  });
 
   const onSubmit = (data) => {
-    axiosWithAuth()
-      .post(`/login`, data)
-      .then((res) => {
-        console.log("This is response ", res);
-        reset({ username: '', password: ''})
+    console.log('ONSUBMIT', data);
 
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("id", res.data.id);
-        props.history.push('/home')
+    setLoading(true);
+    
+    dispatch(login(data.username, data.password))
+      .then((res) => {
+        props.history.push("/home");
+        window.location.reload();
+        console.log('User logged message: ', res);
       })
-      .catch((err) => console.log("Axios error ", err.response));
+      .catch((error) => {
+        setLoading(false);
+        console.log("Axios error ", message);
+      });
+
+    if (isLoggedIn) {
+      return <Redirect to="/home" />;
+    }
   };
 
   return (
@@ -86,65 +110,35 @@ export default function SignIn(props) {
           noValidate
           onSubmit={handleSubmit(onSubmit)}
         >
-        <Controller
-          as={TextField}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          required
-          inputRef={register}
-          label="Username"
-          autoFocus
-          name="username"
-          control={control}
-          rules={{ required: true }}
-        />
-        {errors.username && "Username is required!"}
-
-        <Controller
-          as={TextField}
-          variant="outlined"
-          margin="normal"
-          fullWidth
-          required
-          label="Password"
-          type="password"
-          name="password"
-          control={control}
-          rules={{ required: true }}
-        />
-        {errors.password && "Password is required!"}
-
-          {/* <TextField
-          variant="outlined"
-            margin="normal"
-
-            rules={{ required: true }}
-            inputRef={register}
-            required
-            fullWidth
-            id="username"
-            label="Username"
-            name="username"
-            autoComplete="username"
-            autoFocus
-          />
-      {errors.username && "username is required"}
-
-          <TextField
+          <Controller
+            as={TextField}
             variant="outlined"
             margin="normal"
-            inputRef={register}
-
-            required
             fullWidth
-            name="password"
+            required
+            inputRef={register}
+            label="Username"
+            autoFocus
+            name="username"
+            control={control}
+            rules={{ required: true }}
+          />
+          {errors.username && "Username is required!"}
+
+          <Controller
+            as={TextField}
+            variant="outlined"
+            margin="normal"
+            fullWidth
+            required
             label="Password"
             type="password"
-            id="password"
-            autoComplete="current-password"
+            name="password"
+            control={control}
+            rules={{ required: true }}
           />
-      {errors.username && "password is required"} */}
+          {errors.password && "Password is required!"}
+
 
           {/* <FormControlLabel
             control={
@@ -160,6 +154,12 @@ export default function SignIn(props) {
             label="Remember me" 
           /> */}
 
+          {message && (
+              <div className={classes.alertDanger} role="alert">
+                {message}
+              </div>
+          )}
+
           <Button
             type="submit"
             fullWidth
@@ -169,6 +169,7 @@ export default function SignIn(props) {
           >
             Sign In
           </Button>
+          
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
@@ -176,16 +177,21 @@ export default function SignIn(props) {
               </Link>
             </Grid>
             <Grid item>
-              <Link href="#" variant="body2">
+              <Link to={'/register'} className={classes.navLink} variant="body2">
                 {"Don't have an account? Sign Up"}
               </Link>
             </Grid>
           </Grid>
+
+          
         </form>
+        <ReCaptcha className={classes.paper} />
+
       </div>
       <Box mt={8}>
         <Copyright />
       </Box>
+      
     </Container>
   );
 }
