@@ -120,8 +120,8 @@ console.log('is logged in ', isLoggedIn)
               <Link to={'/profile'} className={classes.navLink}>
                 <MenuItem onClick={handleClose}>Profile</MenuItem>
               </Link>
-              <Link to={'/account'} className={classes.navLink}>
-                <MenuItem onClick={handleClose}>My account</MenuItem>
+              <Link to={'/home'} className={classes.navLink}>
+                <MenuItem onClick={handleClose}>My expenses</MenuItem>
               </Link>
               </Menu>
             </div>
