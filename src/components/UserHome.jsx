@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { DataGrid } from "@material-ui/data-grid";
 import { makeStyles } from "@material-ui/core/styles";
 import CircularLoading from "../utils/Loading";
@@ -8,7 +8,13 @@ import DeleteSelected from "./DeleteSelected";
 
 import UserService from "../services/user.service";
 import { useDispatch, useSelector } from "react-redux";
+import { getUserExpenses } from "../store/actions/auth";
 
+import { createMuiTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
+import Typography from '@material-ui/core/Typography';
+
+let theme = createMuiTheme();
+theme = responsiveFontSizes(theme);
 const useStyles = makeStyles((theme) => ({
   root: {
     width: 1024,
@@ -31,6 +37,10 @@ const useStyles = makeStyles((theme) => ({
   },
   form: {
     marginTop: 10,
+  },
+  message: {
+    textAlign: "center",
+    marginBottom: "4rem"
   },
 }));
 
@@ -59,25 +69,54 @@ const columns = [
 
 export default function UserHome(props) {
   const [expenses, setExpenses] = useState([]);
+  const { message } = useSelector((state) => state.message);
+  // const [userData, setUserData] = useState(true);
+  const [successful, setSuccessful] = useState(false);
+
   const [data, setData] = useState([]); // for checkbox selection
   const { user: currentUser } = useSelector((state) => state.auth);
   const classes = useStyles();
+  const dispatch = useDispatch();
+
+  let isRendered = useRef(null);
 
   useEffect(() => {
+    isRendered.current = true;
     if (!currentUser) {
       props.history.push("/login");
       window.location.reload();
     }
+    setSuccessful(false);
+
+    if (isRendered.current) {
+      dispatch(getUserExpenses())
+    }
+
+
     UserService.getUserExpense()
-      .then((res) => {
-        // console.log(res.data);
-        setExpenses(res.data);
+      .then((response) => {
+        console.log('response data', response.data);
+        if (response.status === 202) {
+          console.log('response is 202');
+          // setExpenses([])
+          setSuccessful(true)
+        }
+        if (!response.data.message && isRendered.current) {
+          setExpenses(response.data);
+          setSuccessful(true);
+        } 
+        // return setSuccessful(false)
+        
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log('Some data error', err)
+        setSuccessful(false);
+      });
+
+      return () => isRendered.current = false;
   }, []);
-
-  let message;
-
+  console.log(successful);
+  let msg;
   const create = (newExpense, tags) => {
     axiosWithAuth()
       .post("/expense", { ...newExpense, tags: tags })
@@ -86,8 +125,8 @@ export default function UserHome(props) {
       })
       .catch((err) => {
         // set error message for amount
-        message = err.response.data.errors[0].msg;
-        console.log(message);
+        msg = err.response.data.errors[0].msg;
+        console.log(msg);
       });
   };
 
@@ -108,30 +147,48 @@ export default function UserHome(props) {
     });
   };
 
+// "^4.0.0-alpha.13"
+// @material-ui/lab": "^4.0.0-alpha.57",
   return (
     <div className={classes.root}>
-      {!expenses.length && <CircularLoading />}
-      {expenses.length && (
-        <div style={{ flexGrow: 1, width: 1000, height: 400 }}>
-          <DataGrid
-            autoHeight
-            rows={expenses}
-            columns={columns}
-            pageSize={5}
-            checkboxSelection
-            // set checkbox selection for deleting
-            onSelectionChange={(newSelection) => {
-              setData(newSelection.rowIds);
-            }}
-            {...data}
-          />
+    {message && message !== 'Network Error' && (
+        <div className={classes.message}>
+          <ThemeProvider theme={theme}>
+              <Typography variant="h4">{message}</Typography>
+              <Typography variant="h5">Would you like to create one?</Typography>
+          </ThemeProvider>
         </div>
-      )}
+    )}
+
+
+      {successful ? (
+          <div style={{ flexGrow: 1, width: 1000, height: 400 }}>
+            <DataGrid
+              autoHeight
+              rows={expenses}
+              columns={columns}
+              pageSize={5}
+              checkboxSelection
+              // set checkbox selection for deleting
+              onSelectionChange={(newSelection) => {
+                setData(newSelection.rowIds);
+                console.log(data)
+              }}
+              {...data}
+            />
+          </div>
+        
+      ) 
+      : (
+        <CircularLoading />
+        )}
+
+     
       <DeleteSelected
         checkboxSelection={data}
         deleteSelected={deleteSelected}
       />
-      <AddExpenseForm addExpense={create} message={message} />
+      <AddExpenseForm addExpense={create} message={msg} />
     </div>
   );
 }
