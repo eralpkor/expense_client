@@ -8,15 +8,17 @@ import Divider from '@material-ui/core/Divider';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    margin: 0
+    height: '50px'
   }
 }));
 
 export default function DeleteSelected(props) {
+  const classes = useStyles();
 
+console.log('what is deleted', props.deleted);
   return (
-    <div>
-      {props.checkboxSelection.length ? (
+    <div className={classes.root}>
+      {!props.deleted ? (
         <Container component="main" maxWidth="xs">
             <Button
               type="submit"
