@@ -10,8 +10,12 @@ import UserService from "../services/user.service";
 import { useDispatch, useSelector } from "react-redux";
 import { getUserExpenses } from "../store/actions/auth";
 
-import { createMuiTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
-import Typography from '@material-ui/core/Typography';
+import {
+  createMuiTheme,
+  responsiveFontSizes,
+  ThemeProvider,
+} from "@material-ui/core/styles";
+import Typography from "@material-ui/core/Typography";
 
 let theme = createMuiTheme();
 theme = responsiveFontSizes(theme);
@@ -40,7 +44,6 @@ const useStyles = makeStyles((theme) => ({
   },
   message: {
     textAlign: "center",
-    marginBottom: "4rem"
   },
 }));
 
@@ -70,67 +73,84 @@ const columns = [
 export default function UserHome(props) {
   const [expenses, setExpenses] = useState([]);
   const { message } = useSelector((state) => state.message);
-  // const [userData, setUserData] = useState(true);
   const [successful, setSuccessful] = useState(false);
-
+  const { isExpired } = useSelector((state) => state.auth);
+  const [userMessage, setUserMessage] = useState(message);
+  const [isDeleted, setIsDeleted] = useState(true);
   const [data, setData] = useState([]); // for checkbox selection
   const { user: currentUser } = useSelector((state) => state.auth);
   const classes = useStyles();
   const dispatch = useDispatch();
 
   let isRendered = useRef(null);
-
+// console.log('is token expired ', isExpired);
   useEffect(() => {
     isRendered.current = true;
-    if (!currentUser) {
+    setUserMessage(message);
+    setIsDeleted(true);
+    if (!currentUser || isExpired) { // check if isExpired works
       props.history.push("/login");
       window.location.reload();
     }
     setSuccessful(false);
 
     if (isRendered.current) {
-      dispatch(getUserExpenses())
+      dispatch(getUserExpenses());
     }
-
 
     UserService.getUserExpense()
       .then((response) => {
-        console.log('response data', response.data);
+        console.log("response data", response.data);
         if (response.status === 202) {
-          console.log('response is 202');
-          // setExpenses([])
-          setSuccessful(true)
+          setSuccessful(true);
+          setIsDeleted(true);
         }
         if (!response.data.message && isRendered.current) {
           setExpenses(response.data);
           setSuccessful(true);
-        } 
+        }
         // return setSuccessful(false)
-        
       })
       .catch((err) => {
-        console.log('Some data error', err)
+        console.log("Some data error", err);
         setSuccessful(false);
+        setIsDeleted(true);
       });
 
-      return () => isRendered.current = false;
+    return () => (isRendered.current = false);
   }, []);
-  console.log(successful);
+
   let msg;
   const create = (newExpense, tags) => {
+    setSuccessful(false);
+    setIsDeleted(true);
+    console.log("who is current user ", currentUser);
+
+    if (!currentUser || isExpired) {
+      setSuccessful(false);
+      console.log("who is current user ", currentUser);
+      props.history.push("/login");
+      window.location.reload();
+    }
+    console.log("what is message token ", message);
     axiosWithAuth()
       .post("/expense", { ...newExpense, tags: tags })
       .then((res) => {
+        setSuccessful(true);
+
         setExpenses([...expenses, res.data.expense[0]]);
+        // setUserMessage('');
       })
       .catch((err) => {
         // set error message for amount
         msg = err.response.data.errors[0].msg;
+        setSuccessful(false);
         console.log(msg);
       });
   };
 
   const deleteSelected = () => {
+    setIsDeleted(false);
     // filter out selected expenses for deleting
     var filteredExpenses = expenses.filter(
       (val) => !data.includes(val.id.toString())
@@ -142,51 +162,56 @@ export default function UserHome(props) {
         .then((res) => {
           // update the UI after removing selected expenses
           setExpenses(filteredExpenses);
+          setIsDeleted(true);
+          console.log(message);
         })
-        .catch((err) => err.response);
+        .catch((err) => {
+          console.log(err.response);
+          setIsDeleted(false);
+        });
     });
   };
 
-// "^4.0.0-alpha.13"
-// @material-ui/lab": "^4.0.0-alpha.57",
+  // "^4.0.0-alpha.13"
+  // @material-ui/lab": "^4.0.0-alpha.57",
+  // {successful}
+console.log('what is userMessage ', userMessage);
   return (
     <div className={classes.root}>
-    {message && message !== 'Network Error' && (
+      {expenses.length ? (
+        <div style={{ flexGrow: 1, width: 1000, height: 400 }}>
+          <DataGrid
+            autoHeight
+            rows={expenses}
+            columns={columns}
+            pageSize={5}
+            checkboxSelection
+            // set checkbox selection for deleting
+            onSelectionChange={(newSelection) => {
+              setData(newSelection.rowIds);
+              console.log('what is newSelection ', newSelection.rowIds)
+              !newSelection.rowIds.length ? setIsDeleted(true) :
+              setIsDeleted(false);
+            }}
+            {...data}
+          />
+        </div>
+      ) : (
+        <CircularLoading />
+      )}
+      {userMessage && userMessage !== "Network Error" && (
         <div className={classes.message}>
           <ThemeProvider theme={theme}>
-              <Typography variant="h4">{message}</Typography>
-              <Typography variant="h5">Would you like to create one?</Typography>
+            <Typography variant="h4">{userMessage}</Typography>
+            <Typography variant="h5">Would you like to create one?</Typography>
           </ThemeProvider>
         </div>
-    )}
+      )}
 
-
-      {successful ? (
-          <div style={{ flexGrow: 1, width: 1000, height: 400 }}>
-            <DataGrid
-              autoHeight
-              rows={expenses}
-              columns={columns}
-              pageSize={5}
-              checkboxSelection
-              // set checkbox selection for deleting
-              onSelectionChange={(newSelection) => {
-                setData(newSelection.rowIds);
-                console.log(data)
-              }}
-              {...data}
-            />
-          </div>
-        
-      ) 
-      : (
-        <CircularLoading />
-        )}
-
-     
       <DeleteSelected
         checkboxSelection={data}
         deleteSelected={deleteSelected}
+        deleted={isDeleted}
       />
       <AddExpenseForm addExpense={create} message={msg} />
     </div>
