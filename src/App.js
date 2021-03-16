@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Router, Redirect } from "react-router-dom";
 import "./App.css";
 import { Route, Switch } from "react-router-dom";
@@ -11,18 +11,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearMessage } from "./store/actions/message";
 import { history } from "./helpers/history";
 import Profile from "./components/Profile";
-import BoardUser from "./components/BoardUser";
-import BoardModerator from "./components/BoardModerator";
-import BoardAdmin from "./components/BoardAdmin";
 
 function App() {
-  const { user: currentUser } = useSelector((state) => state.auth);
   const { isLoggedIn } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
     history.listen((location) => {
-      console.log("what is location ", location);
       dispatch(clearMessage()); // clear message when changing location
     });
   }, [dispatch]);
