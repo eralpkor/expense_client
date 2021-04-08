@@ -6,10 +6,12 @@ import { axiosWithAuth } from "../utils/axiosWithAuth";
 import AddExpenseForm from "./AddExpenseForm";
 import DeleteSelected from "./DeleteSelected";
 
+import Container from './Mcontainer';
+
+
 import UserService from "../services/user.service";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserExpenses } from "../store/actions/auth";
-
+// import { getUserExpenses } from "../store/actions/auth";
 import {
   createMuiTheme,
   responsiveFontSizes,
@@ -22,28 +24,22 @@ theme = responsiveFontSizes(theme);
 const useStyles = makeStyles((theme) => ({
   root: {
     width: 1024,
-    // height: 500,
     margin: "auto",
-    marginTop: 60,
+    marginTop: theme.spacing(5),
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-
     flexDirection: "column",
-    height: "100%",
   },
   CircleLoading: {
-    marginTop: 600,
+    marginTop: theme.spacing(25),
   },
   divider: {
     margin: "auto",
-    marginTop: 60,
-  },
-  form: {
-    marginTop: 10,
   },
   message: {
     textAlign: "center",
+    padding: "0.1rem"
   },
 }));
 
@@ -71,9 +67,16 @@ const columns = [
 ];
 
 export default function UserHome(props) {
-  const [expenses, setExpenses] = useState([]);
+  const triggerText = 'Open form';
+
+
+  const [expenses, setExpenses] = useState({
+    loading: true,
+    data: [],
+  });
+
+  const { isLoggedIn } = useSelector((state) => state.auth);
   const { message } = useSelector((state) => state.message);
-  const [successful, setSuccessful] = useState(false);
   const { isExpired } = useSelector((state) => state.auth);
   const [userMessage, setUserMessage] = useState(message);
   const [isDeleted, setIsDeleted] = useState(true);
@@ -92,42 +95,44 @@ export default function UserHome(props) {
       props.history.push("/login");
       window.location.reload();
     }
-    setSuccessful(false);
+    console.log('User logged isloggedin: ', isLoggedIn);
 
+    // if (isRendered.current) {
+    //   dispatch(getUserExpenses());
+    // }
+console.log('what is isRendered.current ', isRendered.current);
     if (isRendered.current) {
-      dispatch(getUserExpenses());
-    }
-
-    UserService.getUserExpense()
-      .then((response) => {
-        console.log("response data", response.data);
-        if (response.status === 202) {
-          setSuccessful(true);
-          setIsDeleted(true);
-        }
+      UserService.getUserExpense()
+        .then((response) => {
+          if (response.status === 202) {
+            setExpenses({
+              loading: false,
+              data: []
+            });
+            setUserMessage(response.data.message);
+            setIsDeleted(true);
+          }
         if (!response.data.message && isRendered.current) {
-          setExpenses(response.data);
-          setSuccessful(true);
+          setExpenses({
+            loading: false,
+            data: response.data
+          });
         }
-        // return setSuccessful(false)
       })
       .catch((err) => {
         console.log("Some data error", err);
-        setSuccessful(false);
         setIsDeleted(true);
       });
-
+    }
     return () => (isRendered.current = false);
-  }, []);
+  }, [isExpired]);
 
   let msg;
   const create = (newExpense, tags) => {
-    setSuccessful(false);
     setIsDeleted(true);
-    console.log("who is current user ", currentUser);
+    console.log("isLoggedIn true/false ", isLoggedIn);
 
-    if (!currentUser || isExpired) {
-      setSuccessful(false);
+    if (!currentUser || isExpired || !isLoggedIn) {
       console.log("who is current user ", currentUser);
       props.history.push("/login");
       window.location.reload();
@@ -136,15 +141,24 @@ export default function UserHome(props) {
     axiosWithAuth()
       .post("/expense", { ...newExpense, tags: tags })
       .then((res) => {
-        setSuccessful(true);
-
-        setExpenses([...expenses, res.data.expense[0]]);
-        // setUserMessage('');
+        setExpenses({
+          loading: false,
+          data: [...expenses.data, res.data.expense[0]],
+        });
+        setUserMessage('');
       })
       .catch((err) => {
         // set error message for amount
+        if (err.response.data.statusText === 'Unauthorized') {
+          console.log('WHAT IS THE ERR ', err.response);
+          props.history.push("/login");
+        }
+        console.log('WHAT IS THE ERR ', err.response.data.errors);
+        if (err.response.data.errors.includes('Invalid token')) {
+          props.history.push("/login");
+          window.location.reload();
+        }
         msg = err.response.data.errors[0].msg;
-        setSuccessful(false);
         console.log(msg);
       });
   };
@@ -152,7 +166,7 @@ export default function UserHome(props) {
   const deleteSelected = () => {
     setIsDeleted(false);
     // filter out selected expenses for deleting
-    var filteredExpenses = expenses.filter(
+    var filteredExpenses = expenses.data.filter(
       (val) => !data.includes(val.id.toString())
     );
 
@@ -161,12 +175,19 @@ export default function UserHome(props) {
         .delete(`/expense/${val}`)
         .then((res) => {
           // update the UI after removing selected expenses
-          setExpenses(filteredExpenses);
+          setExpenses({
+            loading: false,
+            data:filteredExpenses
+          });
           setIsDeleted(true);
+          if (expenses.data.length === 0) {
+            setUserMessage(message);
+          }
           console.log(message);
         })
         .catch((err) => {
-          console.log(err.response);
+          console.log(err.response.data.errors);
+          setUserMessage(err.response.data.errors);
           setIsDeleted(false);
         });
     });
@@ -174,27 +195,28 @@ export default function UserHome(props) {
 
   // "^4.0.0-alpha.13"
   // @material-ui/lab": "^4.0.0-alpha.57",
-  // {successful}
-console.log('what is userMessage ', userMessage);
+console.log('what is user message ', userMessage);
+
   return (
     <div className={classes.root}>
-      {expenses.length ? (
+      {!expenses.loading ? (
         <div style={{ flexGrow: 1, width: 1000, height: 400 }}>
           <DataGrid
             autoHeight
-            rows={expenses}
+            rows={expenses.data}
             columns={columns}
             pageSize={5}
             checkboxSelection
             // set checkbox selection for deleting
             onSelectionChange={(newSelection) => {
               setData(newSelection.rowIds);
-              console.log('what is newSelection ', newSelection.rowIds)
               !newSelection.rowIds.length ? setIsDeleted(true) :
               setIsDeleted(false);
             }}
             {...data}
           />
+
+          {/* <Container triggerText={triggerText} addExpense={create} /> */}
         </div>
       ) : (
         <CircularLoading />
@@ -202,8 +224,7 @@ console.log('what is userMessage ', userMessage);
       {userMessage && userMessage !== "Network Error" && (
         <div className={classes.message}>
           <ThemeProvider theme={theme}>
-            <Typography variant="h4">{userMessage}</Typography>
-            <Typography variant="h5">Would you like to create one?</Typography>
+            <Typography variant="h6">{userMessage}</Typography>
           </ThemeProvider>
         </div>
       )}
