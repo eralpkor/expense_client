@@ -4,8 +4,6 @@ import Button from "@material-ui/core/Button";
 import { makeStyles } from '@material-ui/core/styles';
 import Divider from '@material-ui/core/Divider';
 
-
-
 const useStyles = makeStyles((theme) => ({
   root: {
     height: '50px'
@@ -15,7 +13,6 @@ const useStyles = makeStyles((theme) => ({
 export default function DeleteSelected(props) {
   const classes = useStyles();
 
-console.log('what is deleted', props.deleted);
   return (
     <div className={classes.root}>
       {!props.deleted ? (
@@ -31,7 +28,7 @@ console.log('what is deleted', props.deleted);
             </Button>
         </Container>
       ) : (
-        <Divider className='divider' color='secondary'  />
+        <Divider   />
       )}
     </div>
   )
