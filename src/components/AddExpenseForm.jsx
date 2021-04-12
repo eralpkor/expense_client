@@ -1,15 +1,31 @@
 import React, { useState } from "react";
-import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import Container from "@material-ui/core/Container";
-import Button from "@material-ui/core/Button";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { makeStyles } from "@material-ui/core/styles";
+import { useSelector } from "react-redux";
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup';
+import { Form } from './Form';
+import { Input } from './Input';
+import { MainContainer } from './MainContainer';
+import { PrimaryButton } from './PrimaryButton';
+import Modal from '@material-ui/core/Modal';
+
+const schema = yup.object().shape({
+  title: yup
+    .string().min(3, 'Minimum of 3 characters required')
+    .required('Title field is required'),
+  amount: yup
+    .number()
+    .required('Amount is required. '),
+  tags: yup
+    .string()
+    .required('Tags are required field.')
+})
 
 const useStyles = makeStyles((theme) => ({
   root: {
     width: 1024,
-    // height: 500,
     margin: "auto",
     marginTop: 60,
     display: "flex",
@@ -26,13 +42,12 @@ const useStyles = makeStyles((theme) => ({
     margin: "auto",
     marginTop: 60,
   },
-  form: {
-    marginTop: 10,
-  },
 }));
 
 export default function AddExpenseForm(props) {
   const [auto, setAuto] = useState({}); // used for tricking the auto complete.
+  const { isExpired } = useSelector((state) => state.auth);
+console.log('is it expired ', isExpired);
   const classes = useStyles();
   const {
     control,
@@ -40,9 +55,17 @@ export default function AddExpenseForm(props) {
     errors,
     handleSubmit,
     reset,
-    formState: { isSubmitSuccessful },
-  } = useForm({ defaultValues: { title: "", amount: "" } });
-
+    // formState: { isSubmitted },
+  } = useForm({
+    defaultValues: {
+      title: "", 
+      amount: "",
+      tags: "",
+    },
+    mode: 'onBlur',
+    resolver: yupResolver(schema)
+  });
+// console.log('is submit out of function ', isSubmitted);
   const onAuto = (tag) => {
     if (!tag) {
       console.log("WTF dude");
@@ -51,57 +74,46 @@ export default function AddExpenseForm(props) {
     console.log(auto);
   };
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
+    if (isExpired) {
+      props.history.push("/login");
+    }
     let tags = auto.tags;
     if (!tags) {
       console.log("WTF dude/");
     }
-
+   
     props.addExpense(e, tags);
-  };
+    reset()
+  }
+
 
   return (
-    <Container component="main" maxWidth="xs">
-      <form
-        className={classes.form}
-        noValidate
-        onSubmit={handleSubmit(onSubmit)}
+    <MainContainer >
+      <Form
+        onSubmit={ handleSubmit(onSubmit)}
+        onReset={event => {
+          event.preventDefault();
+        }}
       >
-        <Controller
-          as={TextField}
-          variant="outlined"
-          margin="normal"
-          fullWidth
+        <Input 
+          ref={register}
+          name='title'
+          type='text'
+          label='Title'
           required
-          inputRef={register({ required: true, minLength: 2 })}
-          label="Title"
-          autoFocus
-          name="title"
-          control={control}
+          error={!!errors.title}
+          helperText={errors?.title?.message}
         />
-        {errors.title &&
-          errors.title.type === "required" &&
-          "Title is required!"}
-        {errors.title &&
-          errors.title.type === "minLength" &&
-          "This field required min length of 2"}
-
-        <Controller
-          as={TextField}
-          variant="outlined"
-          margin="normal"
-          fullWidth
+        <Input 
+          ref={register}
+          name='amount'
+          type='number'
+          label='Amount'
           required
-          inputRef={register}
-          label="Amount"
-          defaultValue=""
-          autoFocus
-          name="amount"
-          control={control}
-          rules={{ required: true }}
-          type="number"
+          error={!!errors.title}
+          helperText={errors?.amount?.message}
         />
-        {errors.amount && "Amount is required!"}
 
         <Autocomplete
           id="combo-box"
@@ -110,30 +122,21 @@ export default function AddExpenseForm(props) {
           maxwidth="xs"
           onChange={(event, value) => onAuto(value)}
           renderInput={(params) => (
-            <TextField
-              {...params}
-              label="Select a tag"
-              variant="outlined"
-              name="tags"
+            <Input
+            {...params}
+              ref={register}
+              name='tags'
+              type='text'
+              label='Select a tag'
               required
-              control={control}
-              rules={{ required: true }}
-            />
+              error={!!errors.tags}
+              helperText={errors?.tags?.message}
+          />
           )}
         />
-        {errors.tags && "Tags required"}
-
-        <Button
-          type="submit"
-          fullWidth
-          variant="contained"
-          color="primary"
-          className={classes.submit}
-        >
-          Submit
-        </Button>
-      </form>
-    </Container>
+        <PrimaryButton type="submit">Submit</PrimaryButton>
+      </Form>
+    </MainContainer>
   );
 }
 
@@ -149,3 +152,13 @@ const tags = [
 ];
 
 // EOF
+
+{/* <TextField
+              {...params}
+              label="Select a tag"
+              variant="outlined"
+              name="tags"
+              required
+              control={control}
+              rules={{ required: true }}
+            /> */}
