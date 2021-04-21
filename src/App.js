@@ -11,6 +11,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { clearMessage } from "./store/actions/message";
 import { history } from "./helpers/history";
 import Profile from "./components/Profile";
+import NotFoundPage from "./components/NotFoundPage"
+
 
 function App() {
   const { isLoggedIn } = useSelector((state) => state.auth);
@@ -49,6 +51,7 @@ function App() {
           <Route exact path="/register" component={Register} />
           <PrivateRoute exact path="/home" component={UserHome} />
           <PrivateRoute exact path="/profile" component={Profile} />
+          <Route component={NotFoundPage} />
         </Switch>
       </div>
     </Router>
