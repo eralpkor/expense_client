@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
@@ -14,6 +14,14 @@ import Menu from "@material-ui/core/Menu";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../store/actions/auth";
 import { Link } from "react-router-dom";
+// for dark theme
+import { createMuiTheme, ThemeProvider } from "@material-ui/core/styles";
+import {
+  orange,
+  lightBlue,
+  deepPurple,
+  deepOrange
+} from "@material-ui/core/colors";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -34,13 +42,35 @@ const useStyles = makeStyles((theme) => ({
 export default function Navigation() {
   const { isLoggedIn } = useSelector((state) => state.auth);
   const { user: currentUser } = useSelector((state) => state.auth);
-
+console.log(currentUser);
   const dispatch = useDispatch();
 
   const classes = useStyles();
-  const [auth, setAuth] = React.useState(isLoggedIn); // if logged switch
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [darkState, setDarkState] = useState(false); // Dark mode
+  const palletType = darkState ? "dark" : "light";
+  const mainPrimaryColor = darkState ? orange[500] : lightBlue[500];
+  const mainSecondaryColor = darkState ? deepOrange[900] : deepPurple[500];
+
+  const [auth, setAuth] = useState(isLoggedIn); // if logged switch
+  const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+
+  // dark theme
+  const darkTheme = createMuiTheme({
+    palette: {
+      type: palletType,
+      primary: {
+        main: mainPrimaryColor
+      },
+      secondary: {
+        main: mainSecondaryColor
+      }
+    }
+  });
+  // dark theme function
+  const handleThemeChange = () => {
+    setDarkState(!darkState);
+  };
 
   const handleChange = (event) => {
     if (auth) {
@@ -61,18 +91,23 @@ export default function Navigation() {
 
   return (
     <div className={classes.root}>
-      <FormGroup>
-        <FormControlLabel
-          control={
+
+    <ThemeProvider theme={darkTheme}>
+      <div> Dark Mode </div>
+      <Switch checked={darkState} onChange={handleThemeChange} />
+      <FormControlLabel 
+      control={
             <Switch
-              checked={auth}
-              onChange={handleChange}
-              aria-label="login switch"
+              checked={darkState}
+              onChange={handleThemeChange}
+              aria-label="darkMode switch"
             />
           }
-          label={auth ? "Logout" : "Login"}
-        />
-      </FormGroup>
+          label={darkState ? "Go Light Mode" : "Go Dark Mode"}
+      />
+    </ThemeProvider>
+
+      
       <AppBar position="static">
         <Toolbar>
           {/* <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu">
@@ -81,6 +116,18 @@ export default function Navigation() {
           <Typography variant="h6" className={classes.title}>
             Expenses
           </Typography>
+          <FormGroup>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={auth}
+              onChange={handleChange}
+              aria-label="login switch"
+            />
+          }
+          label={auth ? `Logout ${currentUser.firstname}` : "Login"}
+        />
+      </FormGroup>
           {auth && (
             <div>
               <IconButton
@@ -90,7 +137,7 @@ export default function Navigation() {
                 onClick={handleMenu}
                 color="inherit"
               >
-                {currentUser.user}
+                {/* {currentUser.user} */}
                 <AccountCircle />
               </IconButton>
               <Menu
