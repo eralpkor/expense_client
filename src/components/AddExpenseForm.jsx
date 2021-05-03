@@ -42,10 +42,55 @@ const useStyles = makeStyles((theme) => ({
     margin: "auto",
     marginTop: 60,
   },
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paper: {
+    position: 'absolute',
+    width: 400,
+    backgroundColor: theme.palette.background.paper,
+    border: '0px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(5, 4, 3),
+  },
+  _modalClose: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    padding: '0.5em',
+    lineHeight: 1,
+    background: "#f6f6f7",
+    border: 0,
+    boxShadow: 0,
+    cursor: 'pointer',
+  },
+  _modalCloseIcon: {
+    width: '25px',
+    height: '25px',
+    fill: 'transparent',
+    stroke: 'black',
+    strokeLinecap: 'round',
+    strokeWidth: 2,
+  },
+  _hideVisual: {
+    border: '0 !important',
+    clip: 'rect(0 0 0 0) !important',
+    height: '1px !important',
+    margin: '-1px !important',
+    overflow: 'hidden !important',
+    padding: '0 !important',
+    position: 'absolute !important',
+    width: '1px !important',
+    whiteSpace: 'nowrap !important',
+  },
 }));
 
 export default function AddExpenseForm(props) {
   const [auto, setAuto] = useState({}); // used for tricking the auto complete.
+  const [open, setOpen] = useState(false);
+
   const { isExpired } = useSelector((state) => state.auth);
 console.log('is it expired ', isExpired);
   const classes = useStyles();
@@ -87,9 +132,29 @@ console.log('is it expired ', isExpired);
     reset()
   }
 
+  const handleOpen = () => {
+    setOpen(true);
+  };
 
-  return (
-    <MainContainer >
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const body = (
+     <MainContainer className={classes.paper}>
+      <button
+        aria-label="Close Modal"
+        aria-labelledby="close-modal"
+        className={classes._modalClose}
+        onClick={handleClose}
+      >
+        <span id="close-modal" className={classes._hideVisual}>
+          Close
+        </span>
+        <svg className={classes._modalCloseIcon} viewBox="0 0 40 40">
+          <path d="M 10,10 L 30,30 M 30,10 L 10,30" />
+        </svg>
+      </button>
       <Form
         onSubmit={ handleSubmit(onSubmit)}
         onReset={event => {
@@ -137,6 +202,21 @@ console.log('is it expired ', isExpired);
         <PrimaryButton type="submit">Submit</PrimaryButton>
       </Form>
     </MainContainer>
+    );
+  
+  return (
+   <div>
+    <PrimaryButton type="button" onClick={handleOpen}>
+        Add Expense
+    </PrimaryButton>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        className={classes.modal}
+      >
+        {body}
+      </Modal>
+   </div>
   );
 }
 
