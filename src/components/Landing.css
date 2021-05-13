@@ -1,0 +1,246 @@
+body {
+  /* background: #0b1b34; */
+  height: 100%;
+}
+
+.logo_image {
+  width: 80px;
+  vertical-align: middle;
+  border-style: none;
+}
+
+.signup-sidepane__footer-logo {
+    margin: 0 auto 16px;
+}
+
+.signup-sidepane__inner {
+  display: flex;
+  flex-direction: column;
+}
+
+.email-button {
+  text-decoration: none;
+  text-decoration-line: none;
+  color: black;
+}
+
+.email-button:hover {
+  text-decoration: none;
+  color: black;
+}
+
+#homepage {
+  color: #fff;
+  height: 100%;
+}
+
+/* Left side pane  */
+.signup-sidepane {
+  width: 400px;
+  background: #0b1b34;
+  height: 100%;
+  padding: 90px 50px 0;
+  position: relative;
+}
+
+.signup-sidepane__logo {
+  display: block;
+  margin: auto;
+  position: relative;
+  width: 125px;
+}
+
+.signup-sidepane__logo img {
+  vertical-align: middle;
+  border-style: none;
+}
+
+.signup-controls {
+  margin: auto;
+  margin-top: 70px;
+  max-width: 300px;
+}
+
+.text-break {
+  word-break: break-word!important;
+  overflow-wrap: break-word!important;
+  font-size: 0.8rem;
+}
+
+.signup-controls .signup-option__icon-email::before {
+  background: url(https://d2k5nsl2zxldvw.cloudfront.net/images/icons/sign-in/email_02.svg) no-repeat center center;
+  background-size: 20px 20px;
+}
+.signup-controls .signup-option__icon {
+  border-radius: 28px;
+  box-shadow: none;
+  align-items: center;
+  background: #fff;
+  background-image: none;
+  border: none;
+  color: #0b1b34;
+  display: flex;
+  height: 56px;
+  overflow: hidden;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.signup-controls .signup-option__icon::before {
+  content: '';
+  display: inline-block;
+  height: 20px;
+  margin-left: 3px;
+  margin-right: 10px;
+  position: relative;
+  top: -1px;
+  width: 20px;
+}
+
+.signup-controls .signup-option__icon-mobile::before {
+  background: url(https://d2k5nsl2zxldvw.cloudfront.net/images/icons/sign-in/mobile-phone.svg) no-repeat center center;
+  background-size: 20px 20px;
+}
+
+.signup-controls .signup-option__icon-google::before {
+  background: url(https://d2k5nsl2zxldvw.cloudfront.net/images/icons/sign-in/google.svg) no-repeat center center;
+  background-size: 20px 20px;
+}
+
+.signup-sidepane__footer {
+  bottom: 0;
+  left: 0;
+  padding: 0 30px 20px;
+  position: absolute;
+  width: 100%;
+  font-size: 0.7rem;
+}
+
+.form-text a {
+  color: #0185ff;
+  text-decoration: none;
+}
+
+/* Righ side pane  */
+#homepageBackgroundContainer {
+  width: calc(100% - 400px);
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+.backgroundImage {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.homepage-background-fade {
+  background-image: linear-gradient(180deg,rgba(11,27,52,0) 0,#0b1b34 100%);
+  bottom: 0;
+  height: 560px;
+  position: absolute;
+  right: 0;
+  width: 100%;
+}
+
+.signup-text-content {
+  bottom: 0;
+  color: #fff;
+  padding: 0 80px 60px;
+  position: absolute;
+  right: 0;
+  text-align: left;
+  width: 100%;
+  z-index: 2;
+}
+
+.headline h1 {
+  font-size: 2.5rem;
+}
+
+.hr {
+  background: white;
+  border: none;
+  display: inline-block;
+  height: 4px;
+  margin: 0 0 14px;
+  width: 34px;
+}
+
+
+/* Fading animation */
+.fade {
+  -webkit-animation-name: fade;
+  -webkit-animation-duration: 12s;
+  animation-name: fade;
+  animation-duration: 2s;
+  /* transition: all 2s cubic-bezier(0.23, 1, 0.32, 1) 400ms; */
+}
+
+@-webkit-keyframes fade {
+  from {opacity: .4} 
+  to {opacity: 1}
+}
+
+@keyframes fade {
+  from {opacity: .4} 
+  to {opacity: 1}
+}
+
+/* .fade {
+  animation: fadeIn ease 5s;
+  -webkit-animation: fadeIn ease 5s;
+  -moz-animation: fadeIn ease 5s;
+  -o-animation: fadeIn ease 5s;
+  -ms-animation: fadeIn ease 5s;
+}
+
+
+@keyframes fadeIn{
+  0% {
+    opacity: .5;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@-moz-keyframes fadeIn {
+  0% {
+    opacity: .5;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: .5;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@-o-keyframes fadeIn {
+  0% {
+    opacity: .5;
+  }
+  100% {
+    opacity:1;
+  }
+}
+
+@-ms-keyframes fadeIn {
+  0% {
+    opacity: .5;
+  }
+  100% {
+    opacity:1;
+  }
+} */
