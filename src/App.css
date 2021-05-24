@@ -1,6 +1,8 @@
-body,html {
+body, html {
   margin: 0;
   padding: 0;
+  /* background: #0b1b34; */
+  height: 100%;
 }
 * {
   box-sizing: border-box;
@@ -9,4 +11,9 @@ body,html {
 [role=alert] {
   font-weight: lighter ;
   text-align: center;
+}
+
+.dark-mode {
+  background-color: #0b1b34;
+  color: white;
 }
