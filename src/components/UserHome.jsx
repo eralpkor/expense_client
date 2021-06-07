@@ -5,10 +5,6 @@ import CircularLoading from "../utils/Loading";
 import { axiosWithAuth } from "../utils/axiosWithAuth";
 import AddExpenseForm from "./AddExpenseForm";
 import DeleteSelected from "./DeleteSelected";
-
-import Container from './Mcontainer';
-
-
 import UserService from "../services/user.service";
 import { useDispatch, useSelector } from "react-redux";
 // import { getUserExpenses } from "../store/actions/auth";
@@ -67,9 +63,6 @@ const columns = [
 ];
 
 export default function UserHome(props) {
-  const triggerText = 'Open form';
-
-
   const [expenses, setExpenses] = useState({
     loading: true,
     data: [],
@@ -96,6 +89,8 @@ export default function UserHome(props) {
       window.location.reload();
     }
     console.log('User logged isloggedin: ', isLoggedIn);
+    console.log('User logged isExpired: ', isExpired);
+
 
     // if (isRendered.current) {
     //   dispatch(getUserExpenses());
@@ -215,8 +210,6 @@ console.log('what is user message ', userMessage);
             }}
             {...data}
           />
-
-          {/* <Container triggerText={triggerText} addExpense={create} /> */}
         </div>
       ) : (
         <CircularLoading />
