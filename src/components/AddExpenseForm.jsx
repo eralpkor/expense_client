@@ -3,25 +3,22 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { useForm } from "react-hook-form";
 import { makeStyles } from "@material-ui/core/styles";
 import { useSelector } from "react-redux";
-import * as yup from 'yup'
-import { yupResolver } from '@hookform/resolvers/yup';
-import { Form } from './Form';
-import { Input } from './Input';
-import { MainContainer } from './MainContainer';
-import { PrimaryButton } from './PrimaryButton';
-import Modal from '@material-ui/core/Modal';
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Form } from "./Form";
+import { Input } from "./Input";
+import { MainContainer } from "./MainContainer";
+import { PrimaryButton } from "./PrimaryButton";
+import Modal from "@material-ui/core/Modal";
 
 const schema = yup.object().shape({
   title: yup
-    .string().min(3, 'Minimum of 3 characters required')
-    .required('Title field is required'),
-  amount: yup
-    .number()
-    .required('Amount is required. '),
-  tags: yup
     .string()
-    .required('Tags are required field.')
-})
+    .min(3, "Minimum of 3 characters required")
+    .required("Title field is required"),
+  amount: yup.number().required("Amount is required. "),
+  tags: yup.string().required("Tags are required field."),
+});
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -43,47 +40,47 @@ const useStyles = makeStyles((theme) => ({
     marginTop: 60,
   },
   modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   paper: {
-    position: 'absolute',
+    position: "absolute",
     width: 400,
     backgroundColor: theme.palette.background.paper,
-    border: '0px solid #000',
+    border: "0px solid #000",
     boxShadow: theme.shadows[5],
     padding: theme.spacing(5, 4, 3),
   },
   _modalClose: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     right: 0,
-    padding: '0.5em',
+    padding: "0.5em",
     lineHeight: 1,
     background: "#f6f6f7",
     border: 0,
     boxShadow: 0,
-    cursor: 'pointer',
+    cursor: "pointer",
   },
   _modalCloseIcon: {
-    width: '25px',
-    height: '25px',
-    fill: 'transparent',
-    stroke: 'black',
-    strokeLinecap: 'round',
+    width: "25px",
+    height: "25px",
+    fill: "transparent",
+    stroke: "black",
+    strokeLinecap: "round",
     strokeWidth: 2,
   },
   _hideVisual: {
-    border: '0 !important',
-    clip: 'rect(0 0 0 0) !important',
-    height: '1px !important',
-    margin: '-1px !important',
-    overflow: 'hidden !important',
-    padding: '0 !important',
-    position: 'absolute !important',
-    width: '1px !important',
-    whiteSpace: 'nowrap !important',
+    border: "0 !important",
+    clip: "rect(0 0 0 0) !important",
+    height: "1px !important",
+    margin: "-1px !important",
+    overflow: "hidden !important",
+    padding: "0 !important",
+    position: "absolute !important",
+    width: "1px !important",
+    whiteSpace: "nowrap !important",
   },
 }));
 
@@ -92,25 +89,23 @@ export default function AddExpenseForm(props) {
   const [open, setOpen] = useState(false);
 
   const { isExpired } = useSelector((state) => state.auth);
-console.log('is it expired ', isExpired);
+  console.log("is it expired ", isExpired);
   const classes = useStyles();
   const {
-    control,
     register,
     errors,
     handleSubmit,
     reset,
-    // formState: { isSubmitted },
   } = useForm({
     defaultValues: {
-      title: "", 
+      title: "",
       amount: "",
       tags: "",
     },
-    mode: 'onBlur',
-    resolver: yupResolver(schema)
+    mode: "onBlur",
+    resolver: yupResolver(schema),
   });
-// console.log('is submit out of function ', isSubmitted);
+
   const onAuto = (tag) => {
     if (!tag) {
       console.log("WTF dude");
@@ -127,10 +122,11 @@ console.log('is it expired ', isExpired);
     if (!tags) {
       console.log("WTF dude/");
     }
-   
+
     props.addExpense(e, tags);
-    reset()
-  }
+    handleClose();
+    reset();
+  };
 
   const handleOpen = () => {
     setOpen(true);
@@ -141,7 +137,7 @@ console.log('is it expired ', isExpired);
   };
 
   const body = (
-     <MainContainer className={classes.paper}>
+    <MainContainer className={classes.paper}>
       <button
         aria-label="Close Modal"
         aria-labelledby="close-modal"
@@ -156,25 +152,25 @@ console.log('is it expired ', isExpired);
         </svg>
       </button>
       <Form
-        onSubmit={ handleSubmit(onSubmit)}
-        onReset={event => {
+        onSubmit={handleSubmit(onSubmit)}
+        onReset={(event) => {
           event.preventDefault();
         }}
       >
-        <Input 
+        <Input
           ref={register}
-          name='title'
-          type='text'
-          label='Title'
+          name="title"
+          type="text"
+          label="Title"
           required
           error={!!errors.title}
           helperText={errors?.title?.message}
         />
-        <Input 
+        <Input
           ref={register}
-          name='amount'
-          type='number'
-          label='Amount'
+          name="amount"
+          type="number"
+          label="Amount"
           required
           error={!!errors.title}
           helperText={errors?.amount?.message}
@@ -188,35 +184,31 @@ console.log('is it expired ', isExpired);
           onChange={(event, value) => onAuto(value)}
           renderInput={(params) => (
             <Input
-            {...params}
+              {...params}
               ref={register}
-              name='tags'
-              type='text'
-              label='Select a tag'
+              name="tags"
+              type="text"
+              label="Select a tag"
               required
               error={!!errors.tags}
               helperText={errors?.tags?.message}
-          />
+            />
           )}
         />
         <PrimaryButton type="submit">Submit</PrimaryButton>
       </Form>
     </MainContainer>
-    );
-  
+  );
+
   return (
-   <div>
-    <PrimaryButton type="button" onClick={handleOpen}>
+    <div>
+      <PrimaryButton type="button" onClick={handleOpen}>
         Add Expense
-    </PrimaryButton>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        className={classes.modal}
-      >
+      </PrimaryButton>
+      <Modal open={open} onClose={handleClose} className={classes.modal}>
         {body}
       </Modal>
-   </div>
+    </div>
   );
 }
 
@@ -232,13 +224,3 @@ const tags = [
 ];
 
 // EOF
-
-{/* <TextField
-              {...params}
-              label="Select a tag"
-              variant="outlined"
-              name="tags"
-              required
-              control={control}
-              rules={{ required: true }}
-            /> */}
