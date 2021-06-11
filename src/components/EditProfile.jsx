@@ -1,5 +1,5 @@
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { MainContainer } from './MainContainer';
 import { Form } from './Form';
@@ -28,7 +28,6 @@ export default function EditProfile(props) {
   const { message } = useSelector((state) => state.message);
   // const classes = useStyles();
   const {
-    control,
     register,
     errors,
     handleSubmit,
