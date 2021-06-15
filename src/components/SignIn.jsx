@@ -21,7 +21,7 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, Controller } from "react-hook-form";
 import ReCaptcha from './Captcha';
-import { lightTheme, darkTheme } from "./Theme"
+
 
 const schema = yup.object().shape({
   username: yup
@@ -74,7 +74,6 @@ export default function SignIn(props) {
   const [loading, setLoading] = useState(false);
   const { isLoggedIn } = useSelector((state) => state.auth);
   const { message } = useSelector(state => state.message);
-
   const dispatch = useDispatch();
 
   const classes = useStyles();
@@ -83,8 +82,6 @@ export default function SignIn(props) {
     mode:'onBlur',
     resolver: yupResolver(schema),
   });
-
-  
 
   const onSubmit = (data) => {
     console.log('is logged in', isLoggedIn);
