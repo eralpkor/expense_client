@@ -4,7 +4,7 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Typography from "@material-ui/core/Typography";
 import IconButton from "@material-ui/core/IconButton";
-import MenuIcon from "@material-ui/icons/Menu";
+// import MenuIcon from "@material-ui/icons/Menu";
 import AccountCircle from "@material-ui/icons/AccountCircle";
 import Switch from "@material-ui/core/Switch";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -39,10 +39,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Navigation() {
+export default function Navigation(props) {
   const { isLoggedIn } = useSelector((state) => state.auth);
   const { user: currentUser } = useSelector((state) => state.auth);
-console.log(currentUser);
   const dispatch = useDispatch();
 
   const classes = useStyles();
@@ -68,9 +67,9 @@ console.log(currentUser);
     }
   });
   // dark theme function
-  const handleThemeChange = () => {
-    setDarkState(!darkState);
-  };
+  // const handleThemeChange = () => {
+  //   setDarkState(!darkState);
+  // };
 
   const handleChange = (event) => {
     if (auth) {
@@ -94,16 +93,16 @@ console.log(currentUser);
 
     <ThemeProvider theme={darkTheme}>
       <div> Dark Mode </div>
-      <Switch checked={darkState} onChange={handleThemeChange} />
+      {/* <Switch checked={darkState} onChange={handleThemeChange} /> */}
       <FormControlLabel 
       control={
             <Switch
-              checked={darkState}
-              onChange={handleThemeChange}
+              checked={props.checked}
+              onChange={props.darkMode}
               aria-label="darkMode switch"
             />
           }
-          label={darkState ? "Go Light Mode" : "Go Dark Mode"}
+          label={props.label}
       />
     </ThemeProvider>
 
