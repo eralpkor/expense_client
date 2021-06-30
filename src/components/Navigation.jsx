@@ -92,7 +92,7 @@ export default function Navigation(props) {
     <div className={classes.root}>
 
     <ThemeProvider theme={darkTheme}>
-      <div> Dark Mode </div>
+      {/* <div> Dark Mode </div> */}
       {/* <Switch checked={darkState} onChange={handleThemeChange} /> */}
       <FormControlLabel 
       control={
