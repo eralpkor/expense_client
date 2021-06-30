@@ -105,19 +105,47 @@ export const updateUserInfo = (data) => (dispatch) => {
       dispatch({
         type: USER_UPDATE_SUCCESS,
         payload: {data: data}
+      });
+      dispatch({
+        type: SET_MESSAGE,
+        payload: data.message,
       })
       return Promise.resolve();
     },
     (errors) => {
-      const message = 
-        (errors.response &&
-          errors.response.data &&
-          errors.response.data.message) ||
-          errors.message ||
-          errors.toString();
+      console.log(errors.response.data)
+      // console.log('waht is length here ', typeof errors.response.data.errors.length)
+//       const getErrors = (error, prop) => {
+//         try {
+//           // console.log('What is errors', error)
+//           return error.mapped()[prop].msg
+//         } catch (error) {
+//           return ''
+//         }
+//       }
+// const message = getErrors(errors.response.data.errors, 'email')
+      let msg = []
 
+      if (Array.isArray(errors.response.data.errors)) {
+        msg = errors.response.data.errors.map(err => {
+          console.log('what is the error for update ', err.msg)
+          return err.msg;
+        })
+      }
+      
+      console.log('what is the error for msg ', msg)
+      const message = (errors.response && msg.toString() )
+        || errors.response.data.errors;
+      
+        // (errors.response && msg.msg &&
+        //   errors.response.data &&
+        //   errors.response.data.errors) || // where server message
+        //   errors.message ||
+        //   errors.toString() || msg.toString()
+console.log('what is message in auth ',  message)
       dispatch({
         type: USER_UPDATE_FAILED,
+        payload: message,
       });
 
       dispatch({
@@ -125,7 +153,7 @@ export const updateUserInfo = (data) => (dispatch) => {
         payload: message,
       });
 
-      return Promise.reject();
+      return Promise.reject(message);
     }
     )
 }
@@ -136,16 +164,12 @@ export const logout = () => (dispatch) => {
   dispatch({
     type: LOGOUT,
   });
-  dispatch({
-    type: CLEAR_MESSAGE,
-  })
 };
 
+// display user expenses
 export const getUserExpenses = () => (dispatch) => {
   return AuthService.getUserExpense()
     .then(data => {
-      console.log('USER EXPeNESE FROM AUTH ', data.message);
-
       if (data.message) {
         dispatch({
           type: SET_MESSAGE,
